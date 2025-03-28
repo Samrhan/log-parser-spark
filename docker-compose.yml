@@ -1,0 +1,23 @@
+# spark-log-analysis/docker-compose.yml
+version: '3.8'
+
+services:
+  spark-analyzer:
+    # Construire l'image à partir du Dockerfile dans le répertoire courant (.)
+    build: .
+    container_name: spark_log_analyzer
+    # Définir le répertoire de travail (correspond à WORKDIR dans Dockerfile)
+    working_dir: /app
+    volumes:
+      # Monter le script local dans le conteneur.
+      # Permet de modifier le script sans reconstruire l'image (pratique pour le dev).
+      - ./log_analyzer.py:/app/log_analyzer.py:ro
+
+      # Monter le répertoire 'data' local dans '/data' à l'intérieur du conteneur.
+      # Le script accédera aux logs via /data/access.log
+      # ':ro' signifie read-only (lecture seule), bonne pratique pour les données d'entrée.
+      - ./data:/data:ro
+    # (Optionnel) Si vous avez besoin d'allouer plus de mémoire à Spark (ex: 4 Go)
+    # environment:
+    #  - SPARK_DRIVER_MEMORY=4g
+    #  - SPARK_EXECUTOR_MEMORY=4g # Pertinent surtout en mode cluster, mais peut aider en local aussi
